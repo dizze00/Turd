@@ -1,15 +1,16 @@
 # Turt-Dots
 
-A Python-based turtle graphics drawing tool that allows you to create patterns using a simple command language. Draw dots, lines, and complex patterns with intuitive commands.
+A Python-based turtle graphics drawing tool that allows you to create patterns using a simple command language. Draw dots, lines, and complex patterns with intuitive commands and dynamic color cycling.
 
 ## Features
 
 - **Dot-based drawing**: Create patterns using dots with precise positioning
 - **Multiple drawing modes**: Horizontal, vertical, and directional drawing
-- **Color support**: Change colors dynamically during drawing
+- **Dynamic color support**: Change colors individually or cycle through multiple colors
+- **Color cycling**: Automatically cycle through multiple colors for each dot
 - **Interactive mode**: Real-time pattern creation with immediate feedback
-- **Debug information**: Detailed logging for understanding drawing behavior
 - **Position control**: Precise control over turtle positioning and movement
+- **HTTP API**: REST API for programmatic control (optional)
 
 ## Requirements
 
@@ -51,7 +52,8 @@ Enter coordinates like `150,150` or just press Enter for `0,0`.
 | `-` | Dash (move without drawing) | `-....` moves then draws |
 | `--` | Double dash (draw dot and move) | `--....` draws dot, moves, then draws |
 | `/-` | Skip dot backward | `/-....` skips one position back |
-| `_` | Color change | `_red....` changes color to red |
+| `_` | Single color change | `_red....` changes color to red |
+| `__` | Color cycling | `__red_blue_green__` cycles through colors |
 
 ### Special Commands
 
@@ -62,9 +64,11 @@ Enter coordinates like `150,150` or just press Enter for `0,0`.
 | `offset` | Change turtle position |
 | `help` | Show available commands |
 | `heading` | Display current turtle heading |
+| `rs_rot` | Reset rotation to 180 degrees |
 
 ### Color Support
 
+#### Single Color Change
 Use the `_` command followed by a color name to change colors:
 
 ```
@@ -73,7 +77,26 @@ _blue....    # Draw 4 blue dots
 _white....   # Draw 4 white dots
 ```
 
-Supported colors include: `red`, `blue`, `green`, `yellow`, `white`, `black`, `purple`, `orange`, `pink`, `brown`, `gray`, `cyan`, `magenta`, etc.
+#### Color Cycling (NEW!)
+Use `__` to start and stop color cycling through multiple colors:
+
+```
+__red_violet_green_blue__....  # Draw 4 dots cycling through colors
+```
+
+**How color cycling works:**
+1. Start with `__color1_color2_color3__`
+2. Each dot automatically gets the next color in sequence
+3. When reaching the last color, it cycles back to the first
+4. Type `__` again to stop cycling and return to white
+
+**Example:**
+```
+__red_blue_green__+,,.-f.+,,.../.+,,./...-,,./.-,,...-f.-,,.-f__
+```
+This creates a complex pattern with dots cycling through red, blue, and green colors.
+
+Supported colors include: `red`, `blue`, `green`, `yellow`, `white`, `black`, `purple`, `orange`, `pink`, `brown`, `gray`, `cyan`, `magenta`, `violet`, etc.
 
 ## Examples
 
@@ -84,6 +107,14 @@ Supported colors include: `red`, `blue`, `green`, `yellow`, `white`, `black`, `p
 .,.,.        # Three dots on separate lines
 +,,.....     # Five dots going up
 -,,.....     # Five dots going down
+```
+
+### Color Patterns
+
+```
+_red...._blue...._green....     # Individual color changes
+__red_blue_green__....          # Color cycling
+__red_violet_green_blue__....   # Four-color cycling
 ```
 
 ### Complex Patterns
@@ -99,37 +130,55 @@ This pattern creates:
 4. Five vertical dots going down
 5. Four horizontal dots after backward movement
 
-### Color Patterns
+### Advanced Color Cycling Examples
 
 ```
-_red...._blue...._green....
-```
+# Rainbow pattern
+__red_orange_yellow_green_blue_violet__........
 
-Creates a pattern with different colored dots.
+# Simple cycling
+__red_blue__+,,....-,,....
+
+# Complex pattern with color cycling
+__red_violet_green_blue__+,,.-f.+,,.../.+,,./...-,,./.-,,...-f.-,,.-f__
+```
 
 ## Technical Details
 
 ### Variables
 
-- `pen_size = 2`: Size of the drawing pen
-- `turtle_size = 0.2`: Size of the turtle cursor
-- `t_f_one_dot = 8`: Spacing between dots (pen_size * 4)
+- `dot_size = 2`: Size of the drawing pen
+- `turtle_scale = 0.2`: Size of the turtle cursor
+- `dot_spacing = 8`: Spacing between dots (dot_size * 4)
+
+### Color Cycling Variables
+
+- `color_cycle = []`: List of colors to cycle through
+- `color_cycle_index = 0`: Current position in color cycle
+- `color_cycling = False`: Whether color cycling is active
 
 ### Drawing Logic
 
-1. **Pattern Processing**: Input is processed through `make_dots()` function
-2. **Line-by-line Drawing**: Each line is drawn separately
-3. **Mode Management**: Tracks vertical/horizontal drawing modes
-4. **Position Control**: Precise positioning using turtle graphics commands
+1. **Pattern Processing**: Input is processed through `process_dots()` function
+2. **Color Cycling**: Special handling for `__` color cycling syntax
+3. **Line-by-line Drawing**: Each line is drawn separately
+4. **Mode Management**: Tracks vertical/horizontal drawing modes
+5. **Position Control**: Precise positioning using turtle graphics commands
 
-### Debug Information
+### HTTP API (Optional)
 
-The program provides detailed debug output including:
-- Input processing steps
-- Drawing positions and movements
-- Mode changes
-- Color changes
-- Position updates
+The program includes an HTTP server for programmatic control:
+
+```bash
+# Draw a pattern
+curl -X POST http://localhost:8000 -H "Content-Type: application/json" -d '{"pattern": "..."}'
+
+# Move turtle
+curl -X POST http://localhost:8000 -H "Content-Type: application/json" -d '{"offset": [100, 50]}'
+
+# Clear screen
+curl -X POST http://localhost:8000 -H "Content-Type: application/json" -d '{"clear": true}'
+```
 
 ## File Structure
 
@@ -142,10 +191,11 @@ Turt Dots/
 ## Tips
 
 1. **Start Simple**: Begin with basic patterns like `...` to understand the system
-2. **Use Debug Info**: Pay attention to debug output to understand what's happening
-3. **Experiment**: Try different combinations of commands to create unique patterns
+2. **Experiment with Colors**: Try color cycling for beautiful patterns
+3. **Use Debug Info**: Pay attention to debug output to understand what's happening
 4. **Clear Often**: Use `clear` command to start fresh when experimenting
 5. **Position Control**: Use `offset` command to move to different areas of the screen
+6. **Color Cycling**: Use `__` for automatic color changes - great for gradients and patterns
 
 ## Troubleshooting
 
@@ -153,6 +203,7 @@ Turt Dots/
 - **Pattern Not Drawing**: Check debug output for mode and position information
 - **Unexpected Movement**: Use `heading` command to check turtle direction
 - **Color Issues**: Use `help` to see available color commands
+- **Color Cycling Not Working**: Make sure to close with `__` and use valid color names
 
 ## Contributing
 
@@ -162,6 +213,8 @@ Feel free to modify and extend the program. Some ideas for improvements:
 - Add animation features
 - Create a GUI interface
 - Add more color options
+- Implement pattern templates
+- Add export to image functionality
 
 ## License
 
