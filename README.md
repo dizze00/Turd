@@ -1,4 +1,4 @@
-# Turt-Dots
+# Turd
 
 A Python-based turtle graphics drawing tool that allows you to create patterns using a simple command language. Draw dots, lines, and complex patterns with intuitive commands and dynamic color cycling.
 
